@@ -1,5 +1,5 @@
 bl_info = {
-    "name": "Viewport to selection",
+    "name": "TB_Viewport to selection",
     "author": "Taiseibutsu",
     "version": (0, 1),
     "blender": (2, 80, 0),
@@ -7,7 +7,7 @@ bl_info = {
     "description": "Viewport to selection",
     "warning": "",
     "doc_url": "",
-    "category": "",
+    "category": "TB",
 }
 import bpy
 import bmesh
