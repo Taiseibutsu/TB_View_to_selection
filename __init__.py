@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Viewport to selection",
     "author": "Taiseibutsu",
-    "version": (1, 0),
+    "version": (0, 1),
     "blender": (2, 80, 0),
     "location": "View3D",
     "description": "Viewport to selection",
