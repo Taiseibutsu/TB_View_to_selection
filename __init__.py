@@ -11,7 +11,7 @@ bl_info = {
 }
 import bpy
 import bmesh
-from bpy.props import BoolProperty, FloatProperty, StringProperty, IntProperty, FloatVectorProperty, EnumProperty
+from bpy.props import BoolProperty, IntProperty
 class tb_vts_prop(bpy.types.PropertyGroup):
     number :IntProperty(
         name = "Active Vertex",
