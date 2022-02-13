@@ -9,20 +9,27 @@ bl_info = {
     "doc_url": "",
     "category": "TB",
 }
-import bpy
-import bmesh
-from bpy.props import BoolProperty, IntProperty
+import bpy, bmesh,mathutils
+from bpy.props import BoolProperty, IntProperty, EnumProperty
 
 def no_selection_to_go(self, context):
     self.layout.label(text="Desired active vertex out of selection")
-def calculate_max_v(self, context):
+
+def calculate_max_v():
+    tbctsprop = bpy.context.scene.tb_vts_prop
+    bm=bmesh.from_edit_mesh(bpy.context.active_object.data)
     numberidx = 0
-    for i,v in enumerate(bm.verts):
+    if tbctsprop.selmode == "VERTEX":
+        sel = bm.verts
+    elif tbctsprop.selmode == "EDGE":
+        sel = bm.edges
+    elif tbctsprop.selmode == "FACE":
+        sel = bm.faces
+    for i,v in enumerate(sel):
             if v.select:
                 numberidx = numberidx + 1
     tbctsprop.maxnumber = numberidx
     
-
 class tb_vts_prop(bpy.types.PropertyGroup):
     number :IntProperty(
         name = "Active Vertex",
@@ -31,32 +38,43 @@ class tb_vts_prop(bpy.types.PropertyGroup):
         default=1)
     error :BoolProperty()
     maxnumber :IntProperty()    
+    selmode :EnumProperty(
+        name = "Select mode",
+        description = "Mode to set selection",
+        items= [('VERTEX','vertex','Vertex', 'VERTEXSEL', 0),
+                ('EDGE','edge','Edge', 'EDGESEL', 1),
+                ('FACE', 'face', 'Faces','FACESEL',2)
+        ])       
 class TB_VtS_OT_PREV(bpy.types.Operator):
     bl_idname = "tb_ops.viewtosel_prev"
     bl_label = "Prev"
     bl_options = {'REGISTER', 'UNDO'}
     def draw_header(self,context):
         layout = self.layout
-        layout.label(icon='FRAME_PREV')
     def execute(self, context):
+        tbctsprop = bpy.context.scene.tb_vts_prop
         if tbctsprop.number > 1:
             tbctsprop.number -= 1
+            bpy.ops.tb_ops.viewtosel()
         else:
             bpy.context.window_manager.popup_menu(no_selection_to_go, title="Out of selection", icon='ERROR')
-class TB_VtS_OT_NEXT(bpy.types.Operator):-
+        return {'FINISHED'}
+class TB_VtS_OT_NEXT(bpy.types.Operator):
     bl_idname = "tb_ops.viewtosel_next"
     bl_label = "Next"
     bl_options = {'REGISTER', 'UNDO'}
     def draw_header(self,context):
         layout = self.layout
-        layout.label(icon='FRAME_NEXT')
     def execute(self, context):
+        tbctsprop = bpy.context.scene.tb_vts_prop
         calculate_max_v()
         if tbctsprop.number < tbctsprop.maxnumber:
             tbctsprop.number += 1
+            bpy.ops.tb_ops.viewtosel()
         else:
             bpy.context.window_manager.popup_menu(no_selection_to_go, title="Out of selection", icon='ERROR')            
-class TB_OT_operator(bpy.types.Operator):-
+        return {'FINISHED'}
+class TB_OT_operator(bpy.types.Operator):
     bl_idname = "tb_ops.viewtosel"
     bl_label = "Camera to selection"
     bl_options = {'REGISTER', 'UNDO'}
@@ -68,11 +86,25 @@ class TB_OT_operator(bpy.types.Operator):-
         bm=bmesh.from_edit_mesh(ac_obd)
         varonce = False
         numberidx = 0
-        for i,v in enumerate(bm.verts):
-            if v.select:
+        if tbctsprop.selmode == "VERTEX":
+            sel = bm.verts
+        elif tbctsprop.selmode == "EDGE":
+            sel = bm.edges
+        elif tbctsprop.selmode == "FACE":
+            sel = bm.faces
+        for i,s in enumerate(sel):
+            if s.select:
                 if numberidx == (tbctsprop.number - 1):
                     mat = ac_ob.matrix_world
-                    loc = mat @ v.co
+                    if tbctsprop.selmode == "VERTEX":
+                        loc = mat @ s.co
+                    else:
+                        verts = s.verts
+                        pos = mathutils.Vector((0.0, 0.0, 0.0))
+                        for tmp_V in verts:
+                            pos = pos + tmp_V.co 
+                        print(pos)
+                        loc = mat @ (pos / 2.0)
                     vl.x = loc[0]
                     vl.y = loc[1]
                     vl.z = loc[2]
@@ -84,6 +116,7 @@ class TB_OT_operator(bpy.types.Operator):-
         else:
             varonce = False
             tbctsprop.error = False
+        print("HERE")
         return {'FINISHED'}
 
 class TB_PT_panel(bpy.types.Panel):
@@ -98,20 +131,34 @@ class TB_PT_panel(bpy.types.Panel):
         layout = self.layout
         layout.label(text="",icon='CAMERA_DATA')
     def draw(self, context):
-        layout = self.layout
-        tbctsprop = bpy.context.scene.tb_vts_prop
-        if tbctsprop.error:
-            if tbctsprop.maxnumber == 0:
-                layout.label(text="Vertex selection not initialiced",icon='ERROR')
-            else:
-                layout.label(text="Vertex to target out of range",icon='ERROR')
-                layout.label(text="Expected values: from 1 to " + str(tbctsprop.maxnumber),icon='BLANK1') 
         if context.active_object.type == 'MESH':
             if context.active_object.mode == 'EDIT':
-                layout.prop(tbctsprop,"number")
-                layout.operator("tb_ops.viewtosel",icon='RESTRICT_SELECT_OFF')
+                tbctsprop = bpy.context.scene.tb_vts_prop
+                layout = self.layout
+                bm = bmesh.from_edit_mesh(bpy.context.active_object.data)
+                if tbctsprop.selmode == "VERTEX":
+                    maxnum = [ v.index for v in bm.verts if v.select ]
+                elif tbctsprop.selmode == "EDGE":
+                    maxnum = [ e.index for e in bm.edges if e.select ]
+                elif tbctsprop.selmode == "FACE":
+                    maxnum = [ f.index for f in bm.faces if f.select ]
+                row = layout.row(align=True)
+                row.prop(tbctsprop,"selmode",text="",expand=True)
+                row = layout.row(align=True)
+                row.label(text="Selected Vertices: " + str(len(maxnum)))
+                if tbctsprop.error:
+                    row = layout.row(align=True)
+                    if tbctsprop.maxnumber == 0:
+                        row.label(text="Vertex selection not initialiced",icon='ERROR')
+                    else:
+                        row.label(text="Vertex to target out of range",icon='ERROR')
+                        row.label(text="Expected values: from 1 to " + str(tbctsprop.maxnumber),icon='BLANK1') 
+                row = layout.row(align=True)
+                row.prop(tbctsprop,"number")
+                row.operator("tb_ops.viewtosel",icon='RESTRICT_SELECT_OFF')
         row = layout.row()
-        row.operator(tb_ops.viewtosel_prev
+        row.operator("tb_ops.viewtosel_prev",icon='FRAME_PREV')
+        row.operator("tb_ops.viewtosel_next",icon='FRAME_NEXT')
 classes = (
     tb_vts_prop,
     TB_PT_panel,
