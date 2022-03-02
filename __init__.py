@@ -103,11 +103,14 @@ class TB_OT_operator(bpy.types.Operator):
                         pos = mathutils.Vector((0.0, 0.0, 0.0))
                         for tmp_V in verts:
                             pos = pos + tmp_V.co 
-                        print(pos)
-                        loc = mat @ (pos / 2.0)
+                        if tbctsprop.selmode == "EDGE":
+                            loc = mat @ (pos / 2.0)
+                        else:
+                            loc = mat @ (pos / len(verts))
                     vl.x = loc[0]
                     vl.y = loc[1]
                     vl.z = loc[2]
+                    print(View to + str(loc))
                 numberidx = numberidx + 1
         if (tbctsprop.number) > numberidx:
             varonce = True
@@ -116,7 +119,7 @@ class TB_OT_operator(bpy.types.Operator):
         else:
             varonce = False
             tbctsprop.error = False
-        print("HERE")
+            tbctsprop.maxnumber = numberidx
         return {'FINISHED'}
 
 class TB_PT_panel(bpy.types.Panel):
@@ -143,9 +146,9 @@ class TB_PT_panel(bpy.types.Panel):
                 elif tbctsprop.selmode == "FACE":
                     maxnum = [ f.index for f in bm.faces if f.select ]
                 row = layout.row(align=True)
-                row.prop(tbctsprop,"selmode",text="",expand=True)
+                row.prop(tbctsprop,"selmode",text=" ",expand=True)
                 row = layout.row(align=True)
-                row.label(text="Selected Vertices: " + str(len(maxnum)))
+                row.label(text="Selected_vetices:" + str(len(maxnum)))
                 if tbctsprop.error:
                     row = layout.row(align=True)
                     if tbctsprop.maxnumber == 0:
