@@ -1,13 +1,13 @@
 bl_info = {
-    "name": "TB_Viewport to selection",
+    "name": "View to intividual selection TB",
     "author": "Taiseibutsu",
     "version": (0, 1),
     "blender": (2, 80, 0),
     "location": "View3D",
-    "description": "Viewport to selection",
+    "description": "Move view to individual selection",
     "warning": "",
     "doc_url": "",
-    "category": "TB",
+    "category": "Mesh","TB",
 }
 import bpy, bmesh,mathutils
 from bpy.props import BoolProperty, IntProperty, EnumProperty
@@ -103,14 +103,14 @@ class TB_OT_operator(bpy.types.Operator):
                         pos = mathutils.Vector((0.0, 0.0, 0.0))
                         for tmp_V in verts:
                             pos = pos + tmp_V.co 
-                        if tbctsprop.selmode == "EDGE":
+                        if tbctsprop.selmode == "EDGE": 
                             loc = mat @ (pos / 2.0)
                         else:
                             loc = mat @ (pos / len(verts))
                     vl.x = loc[0]
                     vl.y = loc[1]
                     vl.z = loc[2]
-                    print(View to + str(loc))
+                    print("View to" + str(loc))
                 numberidx = numberidx + 1
         if (tbctsprop.number) > numberidx:
             varonce = True
