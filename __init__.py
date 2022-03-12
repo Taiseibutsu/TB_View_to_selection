@@ -1,5 +1,9 @@
+# (GNU GPL) <2022> <Taiseibutsu>" Developed for Blender 3.2
+# This program is free software: you can redistribute it and/or modify it, WITHOUT ANY WARRANTY that you wont focus on the non selected void from the meshes of tomorrow.
+
+
 bl_info = {
-    "name": "View to intividual selection TB",
+    "name": "View to individual selection TB",
     "author": "Taiseibutsu",
     "version": (0, 1),
     "blender": (2, 80, 0),
