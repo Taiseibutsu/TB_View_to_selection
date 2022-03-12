@@ -1,5 +1,5 @@
 # VTS View to selection
-Tools for quickly move viewport to selected points.
+Tool for quickly move viewport to selected points.
 
 ![image](https://user-images.githubusercontent.com/84092569/156342878-6e1d7078-434e-47fe-a38c-c150eee3c597.png)
 
