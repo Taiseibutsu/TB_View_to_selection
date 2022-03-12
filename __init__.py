@@ -1,7 +1,6 @@
 # (GNU GPL) <2022> <Taiseibutsu>" Developed for Blender 3.2
 # This program is free software: you can redistribute it and/or modify it, WITHOUT ANY WARRANTY that you wont focus on the non selected void from the meshes of tomorrow.
 
-
 bl_info = {
     "name": "View to individual selection TB",
     "author": "Taiseibutsu",
@@ -11,7 +10,7 @@ bl_info = {
     "description": "Move view to individual selection",
     "warning": "",
     "doc_url": "",
-    "category": "Mesh","TB",
+    "category": "TB",
 }
 import bpy, bmesh,mathutils
 from bpy.props import BoolProperty, IntProperty, EnumProperty
